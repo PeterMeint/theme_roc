@@ -72,6 +72,13 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="Staging Noorderpoort">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/theme/roc" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="Systemec">
         <serverdata>
           <mappings>

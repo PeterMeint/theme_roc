@@ -98,7 +98,8 @@ class course_renderer extends \core_course_renderer {
                                    where ti.tagid = t.id
                                    and ti.itemtype = \'course_modules\'
                                    and ti.itemid = ?
-                                   and t.name IN (  \'kennistest\',
+                                   and t.name IN (  \'introductie\',
+                                                    \'kennistest\',
                                                     \'online\',
                                                     \'podcast\',
                                                     \'praktijkafsluiting\',
