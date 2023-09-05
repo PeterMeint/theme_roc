@@ -1,5 +1,3 @@
-[<img src="springinstituut.png" /> ](https://www.springinstituut.nl)
-
 Theme ROC
 ====
 ```
