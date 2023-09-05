@@ -1,6 +1,6 @@
 [<img src="springinstituut.png" /> ](https://www.springinstituut.nl)
 
-Periods overview Block Plugin
+Theme ROC
 ====
 ```
 This plugin contains the general functions used in Spring Instituut plugins.
