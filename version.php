@@ -18,12 +18,15 @@
  * Roc.
  *
  * @package    theme_roc
- * @copyright  2021 Peter Meint Heida
+ * @copyright  2023 Peter Meint Heida
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2021090301;
+$plugin->release   = '2.0';         // Plugin for LLIP.
+$plugin->version   = 2023090501;
 $plugin->requires  = 2020060900;
 $plugin->component = 'theme_roc';
+$plugin->dependencies = [
+    'theme_boost' => '2022112800'];

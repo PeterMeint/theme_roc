@@ -16,15 +16,23 @@
 
 /**
  * @package   theme_roc
- * @copyright 2021 Peter Meint Heida
+ * @copyright 2023 Peter Meint Heida
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 if ($ADMIN->fulltree) {
-    $settings = new theme_roc_admin_settingspage_tabs('themesettingroc', get_string('configtitle', 'theme_roc'));
+    $settings = new theme_boost_admin_settingspage_tabs('themesettingroc', get_string('configtitle', 'theme_roc'));
     $page = new admin_settingpage('theme_roc_general', get_string('generalsettings', 'theme_roc'));
+
+    // Unaddable blocks.
+    // Blocks to be excluded when this theme is enabled in the "Add a block" list: Administration, Navigation, Courses and
+    // Section links.
+    $default = 'navigation,settings,course_list,section_links';
+    $setting = new admin_setting_configtext('theme_roc/unaddableblocks',
+        get_string('unaddableblocks', 'theme_roc'), get_string('unaddableblocks_desc', 'theme_roc'), $default, PARAM_TEXT);
+    $page->add($setting);
 
     // Preset.
     $name = 'theme_roc/preset';
@@ -62,6 +70,14 @@ if ($ADMIN->fulltree) {
     $title = get_string('backgroundimage', 'theme_roc');
     $description = get_string('backgroundimage_desc', 'theme_roc');
     $setting = new admin_setting_configstoredfile($name, $title, $description, 'backgroundimage');
+    $setting->set_updatedcallback('theme_reset_all_caches');
+    $page->add($setting);
+
+    // Login Background image setting.
+    $name = 'theme_roc/loginbackgroundimage';
+    $title = get_string('loginbackgroundimage', 'theme_roc');
+    $description = get_string('loginbackgroundimage_desc', 'theme_roc');
+    $setting = new admin_setting_configstoredfile($name, $title, $description, 'loginbackgroundimage');
     $setting->set_updatedcallback('theme_reset_all_caches');
     $page->add($setting);
 

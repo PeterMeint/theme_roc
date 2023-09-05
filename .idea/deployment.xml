@@ -2,13 +2,6 @@
 <project version="4">
   <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
-      <paths name="Amur">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
       <paths name="Amur Nanny-Academy">
         <serverdata>
           <mappings>
@@ -58,6 +51,20 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="MBO Amersfoort">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="MBO Template">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/theme/roc" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="Noorderpoort">
         <serverdata>
           <mappings>
@@ -66,6 +73,13 @@
         </serverdata>
       </paths>
       <paths name="SamenMaakJeHetVerschil">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="Staging Coop College">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
@@ -100,28 +114,7 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="staging Amur">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
       <paths name="staging LLIP">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="staging2">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="staging3">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />

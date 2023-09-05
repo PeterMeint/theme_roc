@@ -14,9 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace theme_roc\output\core;
+namespace theme_roc\output;
+
 
 use moodle_url;
+use html_writer;
+use get_string;
+
 
 defined('MOODLE_INTERNAL') || die;
 
@@ -24,122 +28,147 @@ defined('MOODLE_INTERNAL') || die;
  * Renderers to align Moodle's HTML with that expected by Bootstrap
  *
  * @package    theme_roc
- * @copyright  2021 Peter Meint Heida
+ * @copyright  2023 Peter Meint Heida Heidatec Webdevelopment
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class core_renderer extends \core_renderer {
 
-    public function edit_button(moodle_url $url) {
-        $url->param('sesskey', sesskey());
-        if ($this->page->user_is_editing()) {
-            $url->param('edit', 'off');
-            $editstring = get_string('turneditingoff');
+class core_renderer extends \theme_boost\output\core_renderer {
+
+    /**
+     * Renders the context header for the page.
+     *
+     * @param array $headerinfo Heading information.
+     * @param int $headinglevel What 'h' level to make the heading.
+     * @return string A rendered context header.
+     */
+    public function context_header($headerinfo = null, $headinglevel = 1): string {
+        global $DB, $USER, $CFG, $SITE;
+        require_once($CFG->dirroot . '/user/lib.php');
+        $context = $this->page->context;
+        $heading = null;
+        $imagedata = null;
+        $subheader = null;
+        $userbuttons = null;
+        $iconurl = null;
+        $spring_icon_exists = FALSE;
+        $tags = null;
+
+        // Make sure to use the heading if it has been set.
+        if (isset($headerinfo['heading'])) {
+            $heading = $headerinfo['heading'];
         } else {
-            $url->param('edit', 'on');
-            $editstring = get_string('turneditingon');
-        }
-        $button = new \single_button($url, $editstring, 'post', ['class' => 'btn btn-primary']);
-        return $this->render_single_button($button);
-    }
-
-}
-
-require_once($CFG->dirroot.'/course/renderer.php');
-
-use cm_info;
-use core_availability\info;
-use core_text;
-use context_course;
-use coursecat_helper;
-use lang_string;
-use course_in_list;
-use renderable;
-use action_link;
-use stdClass;
-use pix_icon;
-use html_writer;
-class course_renderer extends \core_course_renderer {
-//    public function course_section_cm_name(cm_info $mod, $displayoptions = array()) {
-//    }
-    public function course_section_cm_name_title(cm_info $mod, $displayoptions = array()) {
-        $output = '';
-        $url = $mod->url;
-        if (!$mod->is_visible_on_course_page() || !$url) {
-            // Nothing to be displayed to the user.
-            return $output;
+            $heading = $this->page->heading;
         }
 
-        //Accessibility: for files get description via icon, this is very ugly hack!
-        $instancename = $mod->get_formatted_name();
-        $altname = $mod->modfullname;
-        // Avoid unnecessary duplication: if e.g. a forum name already
-        // includes the word forum (or Forum, etc) then it is unhelpful
-        // to include that in the accessible description that is added.
-        if (false !== strpos(core_text::strtolower($instancename),
-                core_text::strtolower($altname))) {
-            $altname = '';
-        }
-        // File type after name, for alphabetic lists (screen reader).
-        if ($altname) {
-            $altname = get_accesshide(' '.$altname);
-        }
-
-        list($linkclasses, $textclasses) = $this->course_section_cm_classes($mod);
-
-        // Get on-click attribute value if specified and decode the onclick - it
-        // has already been encoded for display (puke).
-        $onclick = htmlspecialchars_decode($mod->onclick, ENT_QUOTES);
-
-        $pix_name = '';
-        global $DB;
-        $result = $DB->get_record_sql('select t.name
-                                   from mdl_tag as t,
-                                        mdl_tag_instance as ti
-                                   where ti.tagid = t.id
-                                   and ti.itemtype = \'course_modules\'
-                                   and ti.itemid = ?
-                                   and t.name IN (  \'introductie\',
-                                                    \'kennistest\',
-                                                    \'online\',
-                                                    \'podcast\',
-                                                    \'praktijkafsluiting\',
-                                                    \'praktijkleerplan\',
-                                                    \'praktijkscan\',
-                                                    \'praktijkvragen\',
-                                                    \'theorie\',
-                                                    \'theorie_en_oefenvragen\')',
-            array($mod->id));
-        if(!empty($result)) {
-            $return_values = new stdClass();
-            switch (strtolower($result->name)) {
-                case 'voorbereiding_praktijkscan' :
-                case 'praktijkscan' :
-                case 'kennistest' :
-                case 'praktijkafsluiting' :
-                case 'praktijkleerplan' :
-                case 'praktijkvragen' :
-                case 'theorie' :
-                case 'theorie_en_oefenvragen' :
-                case 'podcast' :
-                case 'introductie' :
-                case 'online' :
-                    $pix_name = $result->name;
-                    break;
-                default: $pix_name = 'icon';
+        // The user context currently has images and buttons. Other contexts may follow.
+        if ((isset($headerinfo['user']) || $context->contextlevel == CONTEXT_USER) && $this->page->pagetype !== 'my-index') {
+            if (isset($headerinfo['user'])) {
+                $user = $headerinfo['user'];
+            } else {
+                // Look up the user information if it is not supplied.
+                $user = $DB->get_record('user', array('id' => $context->instanceid));
             }
-        } else {
-            $pix_name = 'default';
+
+            // If the user context is set, then use that for capability checks.
+            if (isset($headerinfo['usercontext'])) {
+                $context = $headerinfo['usercontext'];
+            }
+
+            // Only provide user information if the user is the current user, or a user which the current user can view.
+            // When checking user_can_view_profile(), either:
+            // If the page context is course, check the course context (from the page object) or;
+            // If page context is NOT course, then check across all courses.
+            $course = ($this->page->context->contextlevel == CONTEXT_COURSE) ? $this->page->course : null;
+
+            if (user_can_view_profile($user, $course)) {
+                // Use the user's full name if the heading isn't set.
+                if (empty($heading)) {
+                    $heading = fullname($user);
+                }
+
+                $imagedata = $this->user_picture($user, array('size' => 100));
+
+                // Check to see if we should be displaying a message button.
+                if (!empty($CFG->messaging) && has_capability('moodle/site:sendmessage', $context)) {
+                    $userbuttons = array(
+                        'messages' => array(
+                            'buttontype' => 'message',
+                            'title' => get_string('message', 'message'),
+                            'url' => new moodle_url('/message/index.php', array('id' => $user->id)),
+                            'image' => 'message',
+                            'linkattributes' => \core_message\helper::messageuser_link_params($user->id),
+                            'page' => $this->page
+                        )
+                    );
+
+                    if ($USER->id != $user->id) {
+                        $iscontact = \core_message\api::is_contact($USER->id, $user->id);
+                        $contacttitle = $iscontact ? 'removefromyourcontacts' : 'addtoyourcontacts';
+                        $contacturlaction = $iscontact ? 'removecontact' : 'addcontact';
+                        $contactimage = $iscontact ? 'removecontact' : 'addcontact';
+                        $userbuttons['togglecontact'] = array(
+                            'buttontype' => 'togglecontact',
+                            'title' => get_string($contacttitle, 'message'),
+                            'url' => new moodle_url('/message/index.php', array(
+                                    'user1' => $USER->id,
+                                    'user2' => $user->id,
+                                    $contacturlaction => $user->id,
+                                    'sesskey' => sesskey())
+                            ),
+                            'image' => $contactimage,
+                            'linkattributes' => \core_message\helper::togglecontact_link_params($user, $iscontact),
+                            'page' => $this->page
+                        );
+                    }
+
+                    $this->page->requires->string_for_js('changesmadereallygoaway', 'moodle');
+                }
+            } else {
+                $heading = null;
+            }
         }
-        // Display link itself.
-        $activitylink = $this->output->render(new pix_icon($pix_name, '', 'theme_roc', array('title' => $instancename, 'class' => 'roc_mod_icon'))) .
-            html_writer::tag('span', $instancename . $altname, array('class' => 'instancename'));
-        if ($mod->uservisible) {
-            $output .= html_writer::link($url, $activitylink, array('class' => 'aalink' . $linkclasses, 'onclick' => $onclick));
-        } else {
-            // We may be displaying this just in order to show information
-            // about visibility, without the actual link ($mod->is_visible_on_course_page()).
-            $output .= html_writer::tag('div', $activitylink, array('class' => $textclasses));
+
+        $prefix = null;
+        if ($context->contextlevel == CONTEXT_MODULE) {
+            if ($this->page->course->format === 'singleactivity') {
+                $heading = format_string($this->page->course->fullname, true, ['context' => $context]);
+            } else {
+                $heading = $this->page->cm->get_formatted_name();
+
+                $tags = get_tags('course_modules', $this->page->cm->id);
+                $files = scandir($CFG->dirroot.'/course/format/roc2023/pix');
+                foreach ($tags as $tag) {
+                    foreach ($files as $filename) {
+                        if(strpos($filename, $tag->name) !== false) {
+                            $spring_icon_exists = true;
+                            break;
+                        }
+                    }
+                }
+
+                $purposeclass = '';// Origin: plugin_supports('mod', $this->page->activityname, FEATURE_MOD_PURPOSE);
+                $purposeclass .= ' activityiconcontainer';
+                if($spring_icon_exists) {
+                    $iconurl = $this->image_url($tag->name, 'format_roc2023');
+                } else {
+                    $iconurl = $this->page->cm->get_icon_url();
+                    $purposeclass .= ' modicon_' . $this->page->activityname;
+                }
+                $iconclass = $iconurl->get_param('filtericon') ? '' : 'nofilter';
+                $iconattrs = [
+                    'class' => "icon activityicon $iconclass",
+                    'aria-hidden' => 'true'
+                ];
+                $imagedata = html_writer::img($iconurl->out(false), '', $iconattrs);
+                $imagedata = html_writer::tag('div', $imagedata, ['class' => $purposeclass]);
+                if (!empty($USER->editing)) {
+                    $prefix = get_string('modulename', $this->page->activityname);
+                }
+            }
         }
-        return $output;
+
+
+        $contextheader = new \context_header($heading, $headinglevel, $imagedata, $userbuttons, $prefix);
+        return $this->render_context_header($contextheader);
     }
 }

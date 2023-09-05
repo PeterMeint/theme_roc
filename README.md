@@ -13,10 +13,11 @@ This plugin contains the general functions used in Spring Instituut plugins.
 | **Name** | *them_roc* |
 | | |
 
-| Version| Releasedate | Short description |
-| ------ | -------- | -------------------- |
-| 1.1    | sep 2021 | update 2021090301    |
-| 1.0    | jun 2021 | Initial version      |
+| Version| Releasedate | Short description                 |
+| ------ | -------- |-----------------------------------|
+| 2.0    | sep 2023 | New based on Boost for Moodle 4.1 |
+| 1.1    | sep 2021 | update 2021090301                 |
+| 1.0    | jun 2021 | Initial version                   |
 
 :wrench: Settings
 ---
@@ -26,6 +27,7 @@ This plugin contains the general functions used in Spring Instituut plugins.
 ---
 | ReleaseNr  | File                                | Function/Linenr                     | Short description | 
 | ---------- | ----------------------------------- | ----------------------------------- |------------------ |
+| 2023090501 | *** New, based on Boost for Moodle 4.1                                                    *** |
 | 2021090301 | /cls/output/core_renderer.php       | course_section_cm_name_title        | added tag 'introduction' to tags to be handled for showing icons at coursepage | 
 
 :floppy_disk: Install
