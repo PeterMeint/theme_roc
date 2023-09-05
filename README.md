@@ -3,7 +3,7 @@
 Theme ROC
 ====
 ```
-This plugin contains the general functions used in Spring Instituut plugins.
+This plugin contains special lay-out functions for ROC environments based on theme Boost.
 ```
 | | |
 | ---------------- | ----------------------- |
